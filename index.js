@@ -6,7 +6,7 @@ const { InMemorySigner } = require('@taquito/signer')
 const config = require('./config.json')
 const database = require('./database/')
 
-const voteTask = cron.schedule(`*/${config.rewardInterval} * * * *`, async () => {
+const task = cron.schedule(`*/${config.rewardInterval} * * * *`, async () => {
   await database.connected
 
   const signer = new InMemorySigner(config.tezos.admin)
@@ -14,20 +14,37 @@ const voteTask = cron.schedule(`*/${config.rewardInterval} * * * *`, async () =>
   tezos.setSignerProvider(signer)
   const contract = await tezos.contract.at(config.tezos.tokenAddress)
 
-  const pendingRewards = await database.query('SELECT * FROM `rewards_vote` WHERE `status`=?', [0])
-  const records = []
-  for (let i = 0; i < pendingRewards.length; i++) {
-    const reward = pendingRewards[i]
-    records.push({
+  const pendingRewardsVotes = await database.query('SELECT * FROM `rewards_vote` WHERE `status`=?', [0])
+  const pendingRewardsMembers = await database.query('SELECT * FROM `rewards_member` WHERE `status`=?', [0])
+  const total = pendingRewardsVotes.length + pendingRewardsMembers.length
+  const recordsVotes = []
+  const recordsMembers = []
+  if (total === 0) return
+
+  for (let i = 0; i < pendingRewardsVotes.length; i++) {
+    const reward = pendingRewardsVotes[i]
+    recordsVotes.push({
       voter: reward.address,
       asset_id: reward.asset_id
     })
   }
 
+  for (let i = 0; i < pendingRewardsMembers.length; i++) {
+    const reward = pendingRewardsMembers[i]
+    recordsMembers.push({
+      address: reward.address,
+      username: reward.username
+    })
+  }
+
   let rewarded = false
   try {
-    console.log(`Rewarding ${records.length} people...`)
-    const op = await contract.methods.record_votes(records).send()
+    console.log(`Rewarding ${total} people...`)
+    const batch = tezos.contract.batch()
+    if (recordsVotes.length > 0) batch.withContractCall(contract.methods.record_votes(recordsVotes))
+    if (recordsMembers.length > 0) batch.withContractCall(contract.methods.record_members(recordsMembers))
+
+    const op = await batch.send()
     console.log('Confirming rewards...')
     await op.confirmation(1)
     console.log('Successful!')
@@ -38,14 +55,17 @@ const voteTask = cron.schedule(`*/${config.rewardInterval} * * * *`, async () =>
 
   if (rewarded) {
     console.log('Updating database...')
-    const where = pendingRewards.map((reward) => '`id`=' + reward.id).join(' OR ')
-    await database.query('UPDATE `rewards_vote` SET `status`=1 WHERE ' + where)
+    const whereVotes = pendingRewardsVotes.map((reward) => '`id`=' + reward.id).join(' OR ')
+    await database.query('UPDATE `rewards_vote` SET `status`=1 WHERE ' + whereVotes)
+
+    const whereMembers = pendingRewardsMembers.map((reward) => '`id`=' + reward.id).join(' OR ')
+    await database.query('UPDATE `rewards_member` SET `status`=1 WHERE ' + whereMembers)
     console.log('Finished\r\n')
   }
 })
 
 process.on('SIGINT', () => {
-  voteTask.stop()
+  task.stop()
   database.close()
 })
 
