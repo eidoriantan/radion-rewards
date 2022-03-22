@@ -1,0 +1,40 @@
+{
+  "name": "radion-rewards",
+  "version": "1.0.0",
+  "description": "Daemon that automatically distributes RADION rewards",
+  "keywords": [
+    "radion",
+    "rewards",
+    "distribute"
+  ],
+  "private": true,
+  "homepage": "https://github.com/eidoriantan/radion-rewards#readme",
+  "bugs": "https://github.com/eidoriantan/radion-rewards/issues",
+  "license": "UNLICENSED",
+  "author": {
+    "name": "Adriane Justine Tan",
+    "email": "eidoriantan@gmail.com",
+    "url": "https://eidoriantan.tech"
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eidoriantan/radion-rewards.git"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "lint": "standard",
+    "postlint": "git log -1 --format=%B | commitlint",
+    "pretest": "npm run lint",
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "dependencies": {
+    "@commitlint/cli": "^16.2.3",
+    "@commitlint/config-conventional": "^16.2.1",
+    "@taquito/signer": "^12.0.0",
+    "@taquito/taquito": "^12.0.0",
+    "mysql": "^2.18.1",
+    "node-cron": "^3.0.0",
+    "standard": "^16.0.4"
+  }
+}

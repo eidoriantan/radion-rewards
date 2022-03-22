@@ -1,0 +1,15 @@
+{
+  "rewardInterval": 5,
+  "tezos": {
+    "network": "mainnet",
+    "rpc": "https://mainnet.smartpy.io",
+    "tokenAddress": "KT18w2P3sA4MPoWZLWxFmJ8TFxNnKEy9VtEo",
+    "admin": "edskRwp8Boc8Sbc97hxPqWw4KFpscVDy4jjh7e23xoGgG91maSKDpfWDFyADSdRkfbV5gcc4dqSFT6Ahw4FAewNsfy8SzF1KmZ"
+  },
+  "mysql": {
+    "hostname": "localhost",
+    "username": "admin",
+    "password": "admin",
+    "database": "radion"
+  }
+}
