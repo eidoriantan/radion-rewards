@@ -55,11 +55,15 @@ const task = cron.schedule(`*/${config.rewardInterval} * * * *`, async () => {
 
   if (rewarded) {
     console.log('Updating database...')
-    const whereVotes = pendingRewardsVotes.map((reward) => '`id`=' + reward.id).join(' OR ')
-    await database.query('UPDATE `rewards_vote` SET `status`=1 WHERE ' + whereVotes)
+    if (pendingRewardsVotes.length > 0) {
+      const whereVotes = pendingRewardsVotes.map((reward) => '`id`=' + reward.id).join(' OR ')
+      await database.query('UPDATE `rewards_vote` SET `status`=1 WHERE ' + whereVotes)
+    }
 
-    const whereMembers = pendingRewardsMembers.map((reward) => '`id`=' + reward.id).join(' OR ')
-    await database.query('UPDATE `rewards_member` SET `status`=1 WHERE ' + whereMembers)
+    if (pendingRewardsMembers.length > 0) {
+      const whereMembers = pendingRewardsMembers.map((reward) => '`id`=' + reward.id).join(' OR ')
+      await database.query('UPDATE `rewards_member` SET `status`=1 WHERE ' + whereMembers)
+    }
     console.log('Finished\r\n')
   }
 })
