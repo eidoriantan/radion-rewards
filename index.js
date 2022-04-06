@@ -6,13 +6,15 @@ const { InMemorySigner } = require('@taquito/signer')
 const config = require('./config.json')
 const database = require('./database/')
 
+const signer = new InMemorySigner(config.tezos.admin)
+const tezos = new TezosToolkit(config.tezos.rpc)
+tezos.setSignerProvider(signer)
+
 const task = cron.schedule(`*/${config.rewardInterval} * * * *`, async () => {
   await database.connected
 
-  const signer = new InMemorySigner(config.tezos.admin)
-  const tezos = new TezosToolkit(config.tezos.rpc)
-  tezos.setSignerProvider(signer)
   const contract = await tezos.contract.at(config.tezos.tokenAddress)
+  const storage = await contract.storage()
 
   const pendingRewardsVotes = await database.query('SELECT * FROM `rewards_vote` WHERE `status`=?', [0])
   const pendingRewardsMembers = await database.query('SELECT * FROM `rewards_member` WHERE `status`=?', [0])
@@ -49,6 +51,18 @@ const task = cron.schedule(`*/${config.rewardInterval} * * * *`, async () => {
     await op.confirmation(1)
     console.log('Successful!')
     rewarded = true
+
+    const voteCost = storage.vote_reward.c[0] * recordsVotes.length
+    const memberCost = storage.member_reward.c[0] * recordsMembers.length
+    const rewardCostMutez = voteCost + memberCost
+    const rewardCost = rewardCostMutez / 1000000
+    const feesMutez = op.results.map(result => parseInt(result.fee)).reduce((sum, a) => sum + a, 0)
+    const fees = feesMutez / 1000000
+
+    console.log('Rewarded Votes: ' + recordsVotes.length)
+    console.log('Rewarded Wallets: ' + recordsMembers.length)
+    console.log('Reward Cost (RADIO Tokens): ' + rewardCost)
+    console.log('Fees (XTZ): ' + fees)
   } catch (error) {
     console.error(error)
   }
