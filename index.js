@@ -13,9 +13,6 @@ tezos.setSignerProvider(signer)
 const task = cron.schedule(`*/${config.rewardInterval} * * * *`, async () => {
   await database.connected
 
-  const contract = await tezos.contract.at(config.tezos.tokenAddress)
-  const storage = await contract.storage()
-
   const pendingRewardsVotes = await database.query('SELECT * FROM `rewards_vote` WHERE `status`=?', [0])
   const pendingRewardsMembers = await database.query('SELECT * FROM `rewards_member` WHERE `status`=?', [0])
   const total = pendingRewardsVotes.length + pendingRewardsMembers.length
@@ -39,7 +36,10 @@ const task = cron.schedule(`*/${config.rewardInterval} * * * *`, async () => {
     })
   }
 
+  const contract = await tezos.contract.at(config.tezos.tokenAddress)
+  const storage = await contract.storage()
   let rewarded = false
+
   try {
     console.log(`Rewarding ${total} people...`)
     const batch = tezos.contract.batch()
