@@ -4,6 +4,7 @@
     "network": "mainnet",
     "rpc": "https://mainnet.smartpy.io",
     "tokenAddress": "KT18w2P3sA4MPoWZLWxFmJ8TFxNnKEy9VtEo",
+    "billboardAddress": "KT1KnQkh59USXE9CUs5AN348HzhuoQd8RUY1",
     "admin": "edskRwp8Boc8Sbc97hxPqWw4KFpscVDy4jjh7e23xoGgG91maSKDpfWDFyADSdRkfbV5gcc4dqSFT6Ahw4FAewNsfy8SzF1KmZ"
   },
   "mysql": {
