@@ -28,7 +28,13 @@ let billboardLatest = new Promise((resolve, reject) => {
   })
 })
 
-const task = cron.schedule(`*/${config.rewardInterval} * * * *`, async () => {
+const rewardInterval = config.rewardInterval.minute + ' ' +
+  config.rewardInterval.hour + ' ' +
+  config.rewardInterval.dayOfMonth + ' ' +
+  config.rewardInterval.month + ' ' +
+  config.rewardInterval.dayOfWeek
+
+const task = cron.schedule(rewardInterval, async () => {
   await database.connected
 
   const pendingRewardsVotes = await database.query('SELECT * FROM `rewards_vote` WHERE `status`=?', [0])

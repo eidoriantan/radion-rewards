@@ -1,5 +1,11 @@
 {
-  "rewardInterval": 5,
+  "rewardInterval": {
+    "minute": 5,
+    "hour": "*",
+    "dayOfMonth": "*",
+    "month": "*",
+    "dayOfWeek": "*"
+  },
   "tezos": {
     "network": "mainnet",
     "rpc": "https://mainnet.smartpy.io",
