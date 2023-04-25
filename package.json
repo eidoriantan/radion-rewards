@@ -35,7 +35,7 @@
     "node-cron": "^3.0.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^16.2.4",
+    "@commitlint/cli": "^17.6.1",
     "@commitlint/config-conventional": "^16.2.4",
     "standard": "^17.0.0"
   }
